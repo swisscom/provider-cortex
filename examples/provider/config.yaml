@@ -1,20 +1,7 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  namespace: crossplane-system
-  name: example-provider-secret
-type: Opaque
-data:
-  # credentials: BASE64ENCODED_PROVIDER_CREDS
----
-apiVersion: template.crossplane.io/v1alpha1
+apiVersion: cortex.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
-  name: example
+  name: provider-cortex
 spec:
-  credentials:
-    source: Secret
-    secretRef:
-      namespace: crossplane-system
-      name: example-provider-secret
-      key: credentials
+  tenantId: f00bar
+  address: http://localhost:9009

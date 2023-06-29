@@ -1,0 +1,20 @@
+apiVersion: rules.cortex.crossplane.io/v1alpha1
+kind: RuleGroup
+metadata:
+  name: example-rulegroup
+spec:
+  forProvider:
+    namespace: example-namespace
+    # interval: 
+    rules: 
+      - record: instance_path:request_failures:rate5m
+        expr: rate(request_failures_total{job="myjob"}[5m])
+      - alert: HighCPUUtilization
+        expr: avg(node_cpu{mode="system"}) > 80
+        # for: 5m
+        annotations:
+          annotation_name: test
+        labels:
+          label_name: test
+  providerConfigRef:
+    name: provider-cortex
