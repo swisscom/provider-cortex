@@ -23,25 +23,54 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	"github.com/prometheus/common/model"
 )
 
 // RuleGroupParameters are the configurable fields of a RuleGroup.
 type RuleGroupParameters struct {
-	// cannot be changed once set
-	Namespace string         `json:"namespace"`
-	Interval  model.Duration `json:"interval,omitempty"`
-	Rules     []RuleNode     `json:"rules"`
+	// The ruler API uses the concept of a “namespace” when creating rule groups.
+	// This is a stand in for the name of the rule file in Prometheus and rule
+	// groups must be named uniquely within a namespace.
+	Namespace string `json:"namespace"`
+
+	// How often rules in the group are evaluated.
+	Interval *string `json:"interval,omitempty"`
+
+	// Limit the number of alerts an alerting rule and series a recording
+	// rule can produce.
 	// Limit    *int           `json:"limit,omitempty"`
+
+	// Recording and alerting rules exist in a rule group. Rules within a group
+	// are run sequentially at a regular interval, with the same evaluation
+	// time.
+	// https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/#recording-rules
+	Rules []RuleNode `json:"rules"`
 }
 
 type RuleNode struct {
-	Record      *string           `json:"record,omitempty"`
-	Alert       *string           `json:"alert,omitempty"`
-	Expr        string            `json:"expr"`
-	For         model.Duration    `json:"for,omitempty"`
-	Labels      map[string]string `json:"labels,omitempty"`
+	// The name of the time series to output to. Must be a valid metric name.
+	Record *string `json:"record,omitempty"`
+
+	// The name of the alert. Must be a valid label value.
+	Alert *string `json:"alert,omitempty"`
+
+	// The PromQL expression to evaluate. Every evaluation cycle this is
+	// evaluated at the current time, and the result recorded as a new set of
+	// time series with the metric name as given by 'record', or if an 'alert'
+	// is provided all resultant time series become pending/firing alerts.
+	Expr string `json:"expr"`
+
+	// Alerts are considered firing once they have been returned for this long.
+	// Alerts which have not yet fired for long enough are considered pending.
+	For *string `json:"for,omitempty"`
+
+	// Labels to add or overwrite
+	Labels map[string]string `json:"labels,omitempty"`
+
+	// Annotations to add to each alert.
 	Annotations map[string]string `json:"annotations,omitempty"`
+
+	// How long an alert will continue firing after the condition that triggered it
+	// has cleared.
 	// KeepFiringFor model.Duration    `json:"keep_firing_for,omitempty"`
 }
 

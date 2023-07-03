@@ -5,13 +5,13 @@ metadata:
 spec:
   forProvider:
     namespace: example-namespace
-    # interval: 
+    interval: 10m
     rules: 
       - record: instance_path:request_failures:rate5m
         expr: rate(request_failures_total{job="myjob"}[5m])
       - alert: HighCPUUtilization
         expr: avg(node_cpu{mode="system"}) > 80
-        # for: 5m
+        for: 5m
         annotations:
           annotation_name: test
         labels:

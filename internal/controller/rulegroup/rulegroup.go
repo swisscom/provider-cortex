@@ -18,10 +18,11 @@ package rulegroup
 
 import (
 	"context"
-	"fmt"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
+	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/pkg/rulefmt"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/types"
@@ -47,10 +48,11 @@ import (
 )
 
 const (
-	errNotRuleGroup = "managed resource is not a RuleGroup custom resource"
-	errTrackPCUsage = "cannot track ProviderConfig usage"
-	errGetPC        = "cannot get ProviderConfig"
-	errGetCreds     = "cannot get credentials"
+	errNotRuleGroup      = "managed resource is not a RuleGroup custom resource"
+	errRuleGroupNotFound = "requested resource not found"
+	errTrackPCUsage      = "cannot track ProviderConfig usage"
+	errGetPC             = "cannot get ProviderConfig"
+	errGetCreds          = "cannot get credentials"
 
 	errNewClient = "cannot create new Service"
 )
@@ -141,9 +143,10 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 	observedRuleGroup, err := c.service.GetRuleGroup(ctx, cr.Spec.ForProvider.Namespace, meta.GetExternalName(cr))
 	if err != nil {
-		if meta.WasDeleted(cr) {
+		switch {
+		case isErrRuleGroupNotFound(err):
 			return managed.ExternalObservation{}, nil
-		} else {
+		default:
 			return managed.ExternalObservation{}, err
 		}
 	}
@@ -153,8 +156,6 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 			ResourceExists: false,
 		}, nil
 	}
-
-	// currentRuleGroup := cr.Spec.ForProvider.DeepCopy()
 
 	cr.Status.SetConditions(xpv1.Available())
 
@@ -193,16 +194,26 @@ func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 		rns = append(rns, *rn)
 	}
 
+	var interval model.Duration
+	var err error
+
+	if cr.Spec.ForProvider.Interval != nil {
+		interval, err = model.ParseDuration(*cr.Spec.ForProvider.Interval)
+		if err != nil {
+			return managed.ExternalCreation{}, err
+		}
+	}
+
 	rw := rwrulefmt.RuleGroup{
 		RuleGroup: rulefmt.RuleGroup{
-			Name: cr.GetName(),
-			// Interval: cr.Spec.ForProvider.Interval,
+			Name:     cr.GetName(),
+			Interval: interval,
 			// Limit: cr.Spec.ForProvider.Limit,
 			Rules: rns,
 		},
 	}
 
-	err := c.service.CreateRuleGroup(ctx, cr.Spec.ForProvider.Namespace, rw)
+	err = c.service.CreateRuleGroup(ctx, cr.Spec.ForProvider.Namespace, rw)
 	if err != nil {
 		return managed.ExternalCreation{}, err
 	}
@@ -216,7 +227,41 @@ func (c *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalUpdate{}, errors.New(errNotRuleGroup)
 	}
 
-	fmt.Printf("Updating: %+v", cr)
+	rns := []rulefmt.RuleNode{}
+
+	// iterate through group rules
+	for _, rule := range cr.Spec.ForProvider.Rules {
+		rn, err := generateRuleNode(rule)
+		if err != nil {
+			return managed.ExternalUpdate{}, err
+		}
+
+		rns = append(rns, *rn)
+	}
+
+	var interval model.Duration
+	var err error
+
+	if cr.Spec.ForProvider.Interval != nil {
+		interval, err = model.ParseDuration(*cr.Spec.ForProvider.Interval)
+		if err != nil {
+			return managed.ExternalUpdate{}, err
+		}
+	}
+
+	rw := rwrulefmt.RuleGroup{
+		RuleGroup: rulefmt.RuleGroup{
+			Name:     cr.GetName(),
+			Interval: interval,
+			// Limit: cr.Spec.ForProvider.Limit,
+			Rules: rns,
+		},
+	}
+
+	err = c.service.CreateRuleGroup(ctx, cr.Spec.ForProvider.Namespace, rw)
+	if err != nil {
+		return managed.ExternalUpdate{}, err
+	}
 
 	return managed.ExternalUpdate{
 		// Optionally return any details that may be required to connect to the
@@ -241,13 +286,24 @@ func isUpToDate(cr *v1alpha1.RuleGroup, observedRuleGroup *rwrulefmt.RuleGroup) 
 		return false
 	}
 
-	if cr.Spec.ForProvider.Interval != observedRuleGroup.Interval {
+	var interval model.Duration
+	var err error
+
+	if cr.Spec.ForProvider.Interval != nil {
+		interval, err = model.ParseDuration(*cr.Spec.ForProvider.Interval)
+		if err != nil {
+			return false
+		}
+	}
+
+	if interval != observedRuleGroup.Interval {
 		return false
 	}
 
 	var recordRule rulefmt.RuleNode
 	var alertRule rulefmt.RuleNode
 
+	// cortex rules
 	for _, rule := range observedRuleGroup.Rules {
 		if !rule.Record.IsZero() {
 			recordRule = rule
@@ -257,7 +313,7 @@ func isUpToDate(cr *v1alpha1.RuleGroup, observedRuleGroup *rwrulefmt.RuleGroup) 
 		}
 	}
 
-	// iterate through rules and compare
+	// iterate through kubernetes rules and compare
 	for _, rule := range cr.Spec.ForProvider.Rules {
 		rn, err := generateRuleNode(rule)
 		if err != nil {
@@ -280,6 +336,7 @@ func isUpToDate(cr *v1alpha1.RuleGroup, observedRuleGroup *rwrulefmt.RuleGroup) 
 	return true
 }
 
+// generates a Cortex RuleNode from a Kubernetes RuleNode
 func generateRuleNode(specRuleNode v1alpha1.RuleNode) (*rulefmt.RuleNode, error) {
 	rn := rulefmt.RuleNode{}
 
@@ -306,9 +363,12 @@ func generateRuleNode(specRuleNode v1alpha1.RuleNode) (*rulefmt.RuleNode, error)
 		return nil, err
 	}
 	rn.Expr = *yn.Content[0]
-	// if v.For != nil {
-	// 	rn.For = v.For
-	// }
+	if specRuleNode.For != nil {
+		rn.For, err = model.ParseDuration(*specRuleNode.For)
+		if err != nil {
+			return nil, err
+		}
+	}
 	if len(specRuleNode.Labels) != 0 {
 		rn.Labels = specRuleNode.Labels
 	}
@@ -317,4 +377,11 @@ func generateRuleNode(specRuleNode v1alpha1.RuleNode) (*rulefmt.RuleNode, error)
 	}
 
 	return &rn, nil
+}
+
+func isErrRuleGroupNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	return strings.Contains(err.Error(), errRuleGroupNotFound)
 }
