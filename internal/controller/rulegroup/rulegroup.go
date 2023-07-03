@@ -29,6 +29,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	cortexClient "github.com/cortexproject/cortex-tools/pkg/client"
+	"github.com/cortexproject/cortex-tools/pkg/rules/rwrulefmt"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/connection"
 	"github.com/crossplane/crossplane-runtime/pkg/controller"
@@ -42,9 +44,6 @@ import (
 	apisv1alpha1 "github.com/crossplane/provider-cortex/apis/v1alpha1"
 	xpClient "github.com/crossplane/provider-cortex/internal/clients"
 	"github.com/crossplane/provider-cortex/internal/features"
-
-	cortexClient "github.com/cortexproject/cortex-tools/pkg/client"
-	"github.com/cortexproject/cortex-tools/pkg/rules/rwrulefmt"
 )
 
 const (

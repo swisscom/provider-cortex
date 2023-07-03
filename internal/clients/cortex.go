@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	cortexClient "github.com/cortexproject/cortex-tools/pkg/client"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	"github.com/crossplane/provider-cortex/apis/v1alpha1"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/crossplane/provider-cortex/apis/v1alpha1"
 )
 
 // NewClient creates new Cortex Client with provided Cortex Configurations.
