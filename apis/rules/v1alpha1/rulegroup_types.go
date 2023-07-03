@@ -30,43 +30,56 @@ type RuleGroupParameters struct {
 	// The ruler API uses the concept of a “namespace” when creating rule groups.
 	// This is a stand in for the name of the rule file in Prometheus and rule
 	// groups must be named uniquely within a namespace.
+	// This property is required.
+	// +immutable
 	Namespace string `json:"namespace"`
 
 	// How often rules in the group are evaluated.
+	// +optional
 	Interval *string `json:"interval,omitempty"`
 
 	// Limit the number of alerts an alerting rule and series a recording
 	// rule can produce.
+	// +optional
 	// Limit    *int           `json:"limit,omitempty"`
 
 	// Recording and alerting rules exist in a rule group. Rules within a group
 	// are run sequentially at a regular interval, with the same evaluation
 	// time.
 	// https://prometheus.io/docs/prometheus/latest/configuration/recording_rules/#recording-rules
+	// This property is required.
 	Rules []RuleNode `json:"rules"`
 }
 
 type RuleNode struct {
 	// The name of the time series to output to. Must be a valid metric name.
+	// Either 'Record' or 'Alert' is required
+	// +optional
 	Record *string `json:"record,omitempty"`
 
 	// The name of the alert. Must be a valid label value.
+	// Either 'Record' or 'Alert' is required
+	// +optional
 	Alert *string `json:"alert,omitempty"`
 
 	// The PromQL expression to evaluate. Every evaluation cycle this is
 	// evaluated at the current time, and the result recorded as a new set of
 	// time series with the metric name as given by 'record', or if an 'alert'
 	// is provided all resultant time series become pending/firing alerts.
+	// This property is required.
 	Expr string `json:"expr"`
 
 	// Alerts are considered firing once they have been returned for this long.
 	// Alerts which have not yet fired for long enough are considered pending.
+	// +optional
 	For *string `json:"for,omitempty"`
 
 	// Labels to add or overwrite
+	// +optional
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// Annotations to add to each alert.
+	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 
 	// How long an alert will continue firing after the condition that triggered it
