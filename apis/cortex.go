@@ -20,6 +20,7 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
+	alertsv1alpha1 "github.com/crossplane/provider-cortex/apis/alerts/v1alpha1"
 	rulesv1alpha1 "github.com/crossplane/provider-cortex/apis/rules/v1alpha1"
 	cortexv1alpha1 "github.com/crossplane/provider-cortex/apis/v1alpha1"
 )
@@ -29,6 +30,7 @@ func init() {
 	AddToSchemes = append(AddToSchemes,
 		cortexv1alpha1.SchemeBuilder.AddToScheme,
 		rulesv1alpha1.SchemeBuilder.AddToScheme,
+		alertsv1alpha1.SchemeBuilder.AddToScheme,
 	)
 }
 
