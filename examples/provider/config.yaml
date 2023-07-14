@@ -3,5 +3,5 @@ kind: ProviderConfig
 metadata:
   name: provider-cortex
 spec:
-  tenantId: f00bar
-  address: http://localhost:9009
+  tenantId: example-tenant
+  address: http://cortex.default.svc:9009
