@@ -29,7 +29,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	cortexClient "github.com/cortexproject/cortex-tools/pkg/client"
 	"github.com/cortexproject/cortex-tools/pkg/rules/rwrulefmt"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/connection"
@@ -43,6 +42,7 @@ import (
 	"github.com/crossplane/provider-cortex/apis/rules/v1alpha1"
 	apisv1alpha1 "github.com/crossplane/provider-cortex/apis/v1alpha1"
 	xpClient "github.com/crossplane/provider-cortex/internal/clients"
+	"github.com/crossplane/provider-cortex/internal/clients/rulegroups"
 	"github.com/crossplane/provider-cortex/internal/features"
 )
 
@@ -70,7 +70,8 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		managed.WithExternalConnecter(&connector{
 			kube:         mgr.GetClient(),
 			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{}),
-			newServiceFn: xpClient.NewClient}),
+			newServiceFn: newRuleGroupClient}),
+		// newServiceFn: xpClient.NewClient}),
 		// managed.NewNameAsExternalName(c)
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithPollInterval(o.PollInterval),
@@ -90,7 +91,11 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 type connector struct {
 	kube         client.Client
 	usage        resource.Tracker
-	newServiceFn func(config cortexClient.Config) *cortexClient.CortexClient
+	newServiceFn func(config xpClient.Config) rulegroups.RuleGroupClient
+}
+
+func newRuleGroupClient(config xpClient.Config) rulegroups.RuleGroupClient {
+	return xpClient.NewClient(config)
 }
 
 // Connect typically produces an ExternalClient by:
@@ -125,7 +130,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 // external resource to ensure it reflects the managed resource's desired state.
 type external struct {
 	// A 'client' used to connect to the external resource API
-	service *cortexClient.CortexClient
+	service rulegroups.RuleGroupClient
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
@@ -133,12 +138,6 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotRuleGroup)
 	}
-
-	// if meta.GetExternalName(cr) == "" {
-	// 	return managed.ExternalObservation{
-	// 		ResourceExists: false,
-	// 	}, nil
-	// }
 
 	observedRuleGroup, err := c.service.GetRuleGroup(ctx, cr.Spec.ForProvider.Namespace, meta.GetExternalName(cr))
 	if err != nil {
