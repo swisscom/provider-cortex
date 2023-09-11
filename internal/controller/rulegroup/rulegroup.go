@@ -279,6 +279,7 @@ func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
 	return errors.Wrap(err, "")
 }
 
+//gocyclo:ignore
 func isUpToDate(cr *v1alpha1.RuleGroup, observedRuleGroup *rwrulefmt.RuleGroup) bool {
 	if cr == nil || observedRuleGroup == nil {
 		return false
