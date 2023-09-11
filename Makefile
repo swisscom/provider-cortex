@@ -54,6 +54,15 @@ fallthrough: submodules
 # integration tests
 e2e.run: test-integration
 
+# Setup E2E tests based on e2e-framework
+E2E_FILTER ?= .*
+E2E_CONTROLLER ?= $(BUILD_REGISTRY)/$(subst crossplane-,crossplane/,$(PROJECT_NAME)):latest
+E2E_XPKG_TAR ?= $(XPKG_OUTPUT_DIR)/$(PLATFORM)/$(PROJECT_NAME)-$(VERSION).xpkg
+E2E_XPKG_TAG ?= e2e/$(PROJECT_NAME):$(VERSION)
+
+export E2E_IMAGES = {"crossplane/provider-cortex":"${E2E_XPKG_TAG}"}
+
+
 # Run integration tests.
 test-integration: $(KIND) $(KUBECTL) $(UP) $(HELM3)
 	@$(INFO) running integration tests using kind $(KIND_VERSION)
@@ -103,6 +112,20 @@ dev-clean: $(KIND) $(KUBECTL)
 	@$(KIND) delete cluster --name=$(PROJECT_NAME)-dev
 
 .PHONY: submodules fallthrough test-integration run dev dev-clean
+
+.PHOBY: e2e.alternative-run
+
+e2e.alternative-run: $(KIND) $(HELM3) build e2e.alternative-run.load-image
+	@$(INFO) running e2e tests
+	@echo "E2E_IMAGES=$$E2E_IMAGES"
+	go test -v  $(PROJECT_REPO)/e2e/... -tags=e2e -count=1 -test.v -run '$(E2E_FILTER)'
+	@$(OK) e2e tests passed
+
+e2e.alternative-run.load-image:
+
+	$(eval DIGEST=$(shell docker image load -i $(E2E_XPKG_TAR) | cut -d ":" -f3))
+
+	docker tag $(DIGEST) $(E2E_XPKG_TAG)
 
 # ====================================================================================
 # Special Targets
