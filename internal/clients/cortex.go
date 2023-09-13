@@ -13,9 +13,16 @@ import (
 	"github.com/crossplane/provider-cortex/apis/v1alpha1"
 )
 
+type Config struct {
+	cortexClient.Config
+}
+
 // NewClient creates new Cortex Client with provided Cortex Configurations.
-func NewClient(config cortexClient.Config) *cortexClient.CortexClient {
-	client, err := cortexClient.New(config)
+func NewClient(config Config) *cortexClient.CortexClient {
+	client, err := cortexClient.New(cortexClient.Config{
+		Address: config.Address,
+		ID:      config.ID,
+	})
 
 	if err != nil {
 		fmt.Printf("Could not initialize cortex client: %v", err)
@@ -24,7 +31,7 @@ func NewClient(config cortexClient.Config) *cortexClient.CortexClient {
 }
 
 // GetConfig constructs a Config that can be used to authenticate to Cortex
-func GetConfig(ctx context.Context, c client.Client, mg resource.Managed) (*cortexClient.Config, error) {
+func GetConfig(ctx context.Context, c client.Client, mg resource.Managed) (*Config, error) {
 	switch {
 	case mg.GetProviderConfigReference() != nil:
 		return UseProviderConfig(ctx, c, mg)
@@ -34,7 +41,7 @@ func GetConfig(ctx context.Context, c client.Client, mg resource.Managed) (*cort
 }
 
 // UseProviderConfig to produce a config that can be used to authenticate to Cortex.
-func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed) (*cortexClient.Config, error) {
+func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed) (*Config, error) {
 	pc := &v1alpha1.ProviderConfig{}
 	if err := c.Get(ctx, types.NamespacedName{Name: mg.GetProviderConfigReference().Name}, pc); err != nil {
 		return nil, errors.Wrap(err, "cannot get referenced Provider")
@@ -45,7 +52,8 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
 	}
 
-	return &cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address}, nil
+	// return &Config{}, nil
+	return &Config{cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address}}, nil
 
 	// switch s := pc.Spec.Credentials.Source; s { //nolint:exhaustive
 	// case xpv1.CredentialsSourceSecret:

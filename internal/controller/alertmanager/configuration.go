@@ -25,7 +25,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	cortexClient "github.com/cortexproject/cortex-tools/pkg/client"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/connection"
 	"github.com/crossplane/crossplane-runtime/pkg/controller"
@@ -37,6 +36,7 @@ import (
 	"github.com/crossplane/provider-cortex/apis/alerts/v1alpha1"
 	apisv1alpha1 "github.com/crossplane/provider-cortex/apis/v1alpha1"
 	xpClient "github.com/crossplane/provider-cortex/internal/clients"
+	"github.com/crossplane/provider-cortex/internal/clients/alertmanager"
 	"github.com/crossplane/provider-cortex/internal/features"
 )
 
@@ -64,7 +64,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		managed.WithExternalConnecter(&connector{
 			kube:         mgr.GetClient(),
 			usage:        resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1alpha1.ProviderConfigUsage{}),
-			newServiceFn: xpClient.NewClient}),
+			newServiceFn: newAlertManagerClient}),
 		// managed.NewNameAsExternalName(c)
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithPollInterval(o.PollInterval),
@@ -84,7 +84,11 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 type connector struct {
 	kube         client.Client
 	usage        resource.Tracker
-	newServiceFn func(config cortexClient.Config) *cortexClient.CortexClient
+	newServiceFn func(config xpClient.Config) alertmanager.AlertManagerClient
+}
+
+func newAlertManagerClient(config xpClient.Config) alertmanager.AlertManagerClient {
+	return xpClient.NewClient(config)
 }
 
 // Connect typically produces an ExternalClient by:
@@ -119,7 +123,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 // external resource to ensure it reflects the managed resource's desired state.
 type external struct {
 	// A 'client' used to connect to the external resource API
-	service *cortexClient.CortexClient
+	service alertmanager.AlertManagerClient
 }
 
 func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {

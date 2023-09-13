@@ -34,7 +34,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: A AlertManagerConfiguration is an example API type.
+        description: An AlertManagerConfiguration is an example API type.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -50,7 +50,7 @@ spec:
             type: object
           spec:
             description: A AlertManagerConfigurationSpec defines the desired state
-              of a AlertManagerConfiguration.
+              of an AlertManagerConfiguration.
             properties:
               deletionPolicy:
                 default: Delete
@@ -63,7 +63,7 @@ spec:
                 type: string
               forProvider:
                 description: AlertManagerConfigurationParameters are the configurable
-                  fields of a AlertManagerConfiguration.
+                  fields of an AlertManagerConfiguration.
                 properties:
                   alertmanager_config:
                     description: Contains the alert manager configuration. This uses
@@ -251,11 +251,11 @@ spec:
             type: object
           status:
             description: A AlertManagerConfigurationStatus represents the observed
-              state of a AlertManagerConfiguration.
+              state of an AlertManagerConfiguration.
             properties:
               atProvider:
                 description: AlertManagerConfigurationObservation are the observable
-                  fields of a AlertManagerConfiguration.
+                  fields of an AlertManagerConfiguration.
                 properties:
                   data:
                     type: string

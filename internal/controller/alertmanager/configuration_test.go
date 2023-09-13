@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package rulegroup
+package alertmanager
 
 import (
 	"context"
@@ -23,7 +23,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	"github.com/crossplane/crossplane-runtime/pkg/test"
-	"github.com/crossplane/provider-cortex/internal/clients/rulegroups"
+	"github.com/crossplane/provider-cortex/internal/clients/alertmanager"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -37,7 +37,7 @@ import (
 
 func TestObserve(t *testing.T) {
 	type fields struct {
-		service rulegroups.RuleGroupClient
+		service alertmanager.AlertManagerClient
 	}
 
 	type args struct {
