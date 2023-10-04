@@ -166,6 +166,9 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		// Return false when the external resource exists, but it not up to date
 		// with the desired managed resource state. This lets the managed
 		// resource reconciler know that it needs to call Update.
+
+		// Provider doesn't handle errors in isUpToDate, instead of this it returns `false`, which may follow to
+		// unexpected behavior and infinite update without chance to understand what is wrong
 		ResourceUpToDate: isUpToDate(cr, observedRuleGroup),
 
 		// Return any details that may be required to connect to the external
@@ -175,6 +178,8 @@ func (c *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func (c *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
+	// The code inside Create and Update funcs is identical on 99%, probably it would be nice to move the common part to the
+	//	dedicated func and then reuse it.
 	cr, ok := mg.(*v1alpha1.RuleGroup)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotRuleGroup)
@@ -279,8 +284,11 @@ func (c *external) Delete(ctx context.Context, mg resource.Managed) error {
 	return errors.Wrap(err, "")
 }
 
+// It would be nice to decompose this func and add `error` to return variables
+//
 //gocyclo:ignore
 func isUpToDate(cr *v1alpha1.RuleGroup, observedRuleGroup *rwrulefmt.RuleGroup) bool {
+	// if understand correctly `cr` can't be nil, so we will decrease cyclomatic complexity if remove it
 	if cr == nil || observedRuleGroup == nil {
 		return false
 	}
