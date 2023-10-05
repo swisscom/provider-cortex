@@ -20,8 +20,9 @@ type Config struct {
 // NewClient creates new Cortex Client with provided Cortex Configurations.
 func NewClient(config Config) *cortexClient.CortexClient {
 	client, err := cortexClient.New(cortexClient.Config{
-		Address: config.Address,
-		ID:      config.ID,
+		Address:      config.Address,
+		ID:           config.ID,
+		RulerAPIPath: config.RulerAPIPath,
 	})
 
 	if err != nil {
@@ -52,8 +53,12 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
 	}
 
-	// return &Config{}, nil
-	return &Config{cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address}}, nil
+	rulerAPIPath := ""
+	if pc.Spec.RulerAPIPath != nil {
+		rulerAPIPath = *pc.Spec.RulerAPIPath
+	}
+
+	return &Config{cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address, RulerAPIPath: rulerAPIPath}}, nil
 
 	// switch s := pc.Spec.Credentials.Source; s { //nolint:exhaustive
 	// case xpv1.CredentialsSourceSecret:
