@@ -33,11 +33,11 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
-	"github.com/crossplane/provider-cortex/apis/alerts/v1alpha1"
-	apisv1alpha1 "github.com/crossplane/provider-cortex/apis/v1alpha1"
-	xpClient "github.com/crossplane/provider-cortex/internal/clients"
-	"github.com/crossplane/provider-cortex/internal/clients/alertmanager"
-	"github.com/crossplane/provider-cortex/internal/features"
+	"github.com/swisscom/provider-cortex/apis/alerts/v1alpha1"
+	apisv1alpha1 "github.com/swisscom/provider-cortex/apis/v1alpha1"
+	xpClient "github.com/swisscom/provider-cortex/internal/clients"
+	"github.com/swisscom/provider-cortex/internal/clients/alertmanager"
+	"github.com/swisscom/provider-cortex/internal/features"
 )
 
 const (
