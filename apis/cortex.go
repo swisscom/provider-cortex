@@ -20,9 +20,9 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	alertsv1alpha1 "github.com/crossplane/provider-cortex/apis/alerts/v1alpha1"
-	rulesv1alpha1 "github.com/crossplane/provider-cortex/apis/rules/v1alpha1"
-	cortexv1alpha1 "github.com/crossplane/provider-cortex/apis/v1alpha1"
+	alertsv1alpha1 "github.com/swisscom/provider-cortex/apis/alerts/v1alpha1"
+	rulesv1alpha1 "github.com/swisscom/provider-cortex/apis/rules/v1alpha1"
+	cortexv1alpha1 "github.com/swisscom/provider-cortex/apis/v1alpha1"
 )
 
 func init() {

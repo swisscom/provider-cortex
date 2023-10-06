@@ -20,9 +20,9 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/crossplane/provider-cortex/internal/controller/alertmanager"
-	"github.com/crossplane/provider-cortex/internal/controller/config"
-	"github.com/crossplane/provider-cortex/internal/controller/rulegroup"
+	"github.com/swisscom/provider-cortex/internal/controller/alertmanager"
+	"github.com/swisscom/provider-cortex/internal/controller/config"
+	"github.com/swisscom/provider-cortex/internal/controller/rulegroup"
 )
 
 // Setup creates all cortex controllers with the supplied logger and adds them to

@@ -10,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/crossplane/provider-cortex/apis/v1alpha1"
+	"github.com/swisscom/provider-cortex/apis/v1alpha1"
 )
 
 type Config struct {

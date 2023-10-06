@@ -36,10 +36,10 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/ratelimiter"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
-	"github.com/crossplane/provider-cortex/apis"
-	"github.com/crossplane/provider-cortex/apis/v1alpha1"
-	cortex "github.com/crossplane/provider-cortex/internal/controller"
-	"github.com/crossplane/provider-cortex/internal/features"
+	"github.com/swisscom/provider-cortex/apis"
+	"github.com/swisscom/provider-cortex/apis/v1alpha1"
+	cortex "github.com/swisscom/provider-cortex/internal/controller"
+	"github.com/swisscom/provider-cortex/internal/features"
 )
 
 func main() {

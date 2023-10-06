@@ -1,4 +1,4 @@
-module github.com/crossplane/provider-cortex
+module github.com/swisscom/provider-cortex
 
 go 1.20
 
