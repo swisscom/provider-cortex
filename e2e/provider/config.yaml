@@ -1,0 +1,7 @@
+apiVersion: cortex.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: provider-cortex
+spec:
+  tenantId: example-tenant
+  address: http://cortex.default.svc:9009
