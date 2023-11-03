@@ -33,6 +33,11 @@ type ProviderConfigSpec struct {
 	// Address of the cortex server
 	Address string `json:"address"`
 
+	// RulerAPIPath for the Rules endpoint
+	// e.g. /prometheus/config/v1/rules
+	// +optional
+	RulerAPIPath *string `json:"rulerAPIPath,omitempty"`
+
 	// Credentials required to authenticate to this provider.
 	// Credentials ProviderCredentials `json:"credentials"`
 }

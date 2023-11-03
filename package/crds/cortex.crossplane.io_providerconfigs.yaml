@@ -45,6 +45,9 @@ spec:
               address:
                 description: Address of the cortex server
                 type: string
+              rulerAPIPath:
+                description: RulerAPIPath for the Rules endpoint e.g. /prometheus/config/v1/rules
+                type: string
               tenantId:
                 description: ID of the cortex tenant
                 type: string

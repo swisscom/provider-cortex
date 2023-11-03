@@ -486,8 +486,8 @@ github.com/cortexproject/cortex v1.7.1-0.20210316085356-3fedc1108a49/go.mod h1:/
 github.com/cortexproject/cortex v1.8.1-0.20210422151339-cf1c444e0905/go.mod h1:xxm4/CLvTmDxwE7yXwtClR4dIvkG4S09o5DygPOgc1U=
 github.com/cortexproject/cortex v1.13.2 h1:Bz0SstQuvW8HrUVuV5NygORm1eL4p+v5mAMBoMt4Lpg=
 github.com/cortexproject/cortex v1.13.2/go.mod h1:NL24i3LSvY5ChBGHwFFm+gc2ZWCH7E/37/F+1fgjf24=
-github.com/cortexproject/cortex-tools v0.11.2-0.20230927171007-58aa76d01708 h1:0Bne+boFjYJn6/62upv1q1jY/2kYyE+0XddEHNX591E=
-github.com/cortexproject/cortex-tools v0.11.2-0.20230927171007-58aa76d01708/go.mod h1:WULGudjEWbYqufjmjjO4SP276qAWaCKbVaPt/jFh5sE=
+github.com/cortexproject/cortex-tools v0.11.2-0.20231101174637-76a414b4fe47 h1:bQZ1ikD6AI0oCUy/5PKhwSxEYpNEKhGGkfsfkvP72qo=
+github.com/cortexproject/cortex-tools v0.11.2-0.20231101174637-76a414b4fe47/go.mod h1:WULGudjEWbYqufjmjjO4SP276qAWaCKbVaPt/jFh5sE=
 github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsrgA7czyZG/E6dU=
 github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsrgA7czyZG/E6dU=
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
