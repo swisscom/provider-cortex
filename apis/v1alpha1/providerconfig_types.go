@@ -34,7 +34,7 @@ type ProviderConfigSpec struct {
 	Address string `json:"address"`
 
 	// Credentials required to authenticate to this provider.
-	// Credentials ProviderCredentials `json:"credentials"`
+	Credentials ProviderCredentials `json:"credentials"`
 }
 
 // ProviderCredentials required to authenticate.
