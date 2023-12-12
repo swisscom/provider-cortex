@@ -29,20 +29,17 @@ const (
 )
 
 type Config struct {
-	cortexClient.Config
+	cortexClientConfig cortexClient.Config
 }
 
 // NewClient creates new Cortex Client with provided Cortex Configurations.
 func NewClient(config Config) *cortexClient.CortexClient {
-	c, err := cortexClient.New(cortexClient.Config{
-		Address: config.Address,
-		ID:      config.ID,
-	})
+	client, err := cortexClient.New(config.cortexClientConfig)
 
 	if err != nil {
 		fmt.Printf("Could not initialize cortex client: %v", err)
 	}
-	return c
+	return client
 }
 
 // GetConfig constructs a Config that can be used to authenticate to Cortex
@@ -77,6 +74,6 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 		return nil, errors.Wrap(err, errUnmarshalCredentialSecret)
 	}
 
-	return &Config{cortexClient.Config{Address: pc.Spec.Address, User: m[CredentialsKeyUsername], Key: m[CredentialsKeyPassword]}}, nil
-	// return &Config{cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address, User: m[CredentialsKeyUsername], Key: m[CredentialsKeyPassword]}}, nil
+	cfg := cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address, User: m[CredentialsKeyUsername], Key: m[CredentialsKeyPassword]}
+	return &Config{cortexClientConfig: cfg}, nil
 }
