@@ -2,6 +2,7 @@ package clients
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	cortexClient "github.com/cortexproject/cortex-tools/pkg/client"
@@ -13,16 +14,27 @@ import (
 	"github.com/swisscom/provider-cortex/apis/v1alpha1"
 )
 
+// Error strings.
+const (
+	errTrackProviderConfigUsage  = "cannot track ProviderConfig usage"
+	errGetProviderConfig         = "cannot get referenced ProviderConfig"
+	errUnmarshalCredentialSecret = "cannot unmarshal the data in credentials secret"
+	errGetCredentials            = "cannot get credentials"
+)
+
+// Credentials Secret content
+const (
+	CredentialsKeyUsername = "username"
+	CredentialsKeyPassword = "password"
+)
+
 type Config struct {
-	cortexClient.Config
+	cortexClientConfig cortexClient.Config
 }
 
 // NewClient creates new Cortex Client with provided Cortex Configurations.
 func NewClient(config Config) *cortexClient.CortexClient {
-	client, err := cortexClient.New(cortexClient.Config{
-		Address: config.Address,
-		ID:      config.ID,
-	})
+	client, err := cortexClient.New(config.cortexClientConfig)
 
 	if err != nil {
 		fmt.Printf("Could not initialize cortex client: %v", err)
@@ -44,29 +56,24 @@ func GetConfig(ctx context.Context, c client.Client, mg resource.Managed) (*Conf
 func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed) (*Config, error) {
 	pc := &v1alpha1.ProviderConfig{}
 	if err := c.Get(ctx, types.NamespacedName{Name: mg.GetProviderConfigReference().Name}, pc); err != nil {
-		return nil, errors.Wrap(err, "cannot get referenced Provider")
+		return nil, errors.Wrap(err, errGetProviderConfig)
 	}
 
 	t := resource.NewProviderConfigUsageTracker(c, &v1alpha1.ProviderConfigUsage{})
 	if err := t.Track(ctx, mg); err != nil {
-		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
+		return nil, errors.Wrap(err, errTrackProviderConfigUsage)
 	}
 
-	// return &Config{}, nil
-	return &Config{cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address}}, nil
+	data, err := resource.CommonCredentialExtractor(ctx, pc.Spec.Credentials.Source, c, pc.Spec.Credentials.CommonCredentialSelectors)
+	if err != nil {
+		return nil, errors.Wrap(err, errGetCredentials)
+	}
 
-	// switch s := pc.Spec.Credentials.Source; s { //nolint:exhaustive
-	// case xpv1.CredentialsSourceSecret:
-	// 	csr := pc.Spec.Credentials.SecretRef
-	// 	if csr == nil {
-	// 		return nil, errors.New("no credentials secret referenced")
-	// 	}
-	// 	s := &corev1.Secret{}
-	// 	if err := c.Get(ctx, types.NamespacedName{Namespace: csr.Namespace, Name: csr.Name}, s); err != nil {
-	// 		return nil, errors.Wrap(err, "cannot get credentials secret")
-	// 	}
-	// 	return &cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address, Password: string(s.Data[csr.Key])}, nil
-	// default:
-	// 	return nil, errors.Errorf("credentials source %s is not currently supported", s)
-	// }
+	m := map[string]string{}
+	if err := json.Unmarshal(data, &m); err != nil {
+		return nil, errors.Wrap(err, errUnmarshalCredentialSecret)
+	}
+
+	cfg := cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address, User: m[CredentialsKeyUsername], Key: m[CredentialsKeyPassword]}
+	return &Config{cortexClientConfig: cfg}, nil
 }

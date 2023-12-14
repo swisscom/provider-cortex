@@ -9,7 +9,6 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/pkg/errors v0.9.1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
-	k8s.io/api v0.26.5 // indirect
 	k8s.io/apimachinery v0.26.5
 	k8s.io/client-go v12.0.0+incompatible
 	sigs.k8s.io/controller-runtime v0.14.6
@@ -135,6 +134,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	k8s.io/api v0.26.5 // indirect
 	k8s.io/apiextensions-apiserver v0.26.5 // indirect
 	k8s.io/component-base v0.26.5 // indirect
 	k8s.io/klog/v2 v2.90.1 // indirect
