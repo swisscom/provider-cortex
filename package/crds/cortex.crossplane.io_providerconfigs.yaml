@@ -98,12 +98,26 @@ spec:
                 required:
                 - source
                 type: object
+              secretKeys:
+                description: The keys of other cortex configuration parameters that
+                  are retrieved from Credentials secrets
+                properties:
+                  apiKey:
+                    type: string
+                  apiUser:
+                    description: The keys in ProviderCredentials of the cortex credentials.
+                      More info at https://github.com/cortexproject/cortex-tools/blob/main/README.md#configuration
+                    type: string
+                  authToken:
+                    type: string
+                type: object
               tenantId:
                 description: ID of the cortex tenant
                 type: string
             required:
             - address
             - credentials
+            - secretKeys
             - tenantId
             type: object
           status:

@@ -6,6 +6,11 @@ metadata:
 spec:
   address: https://metricstore.abc.net
   tenantId: tenant-example
+  secretKeys:
+    # see https://github.com/cortexproject/cortex-tools/blob/main/README.md#configuration
+    apiUser: username
+    apiKey: password
+    # authToken: token
   credentials:
     source: Secret
     secretRef:

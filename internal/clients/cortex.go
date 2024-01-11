@@ -22,24 +22,18 @@ const (
 	errGetCredentials            = "cannot get credentials"
 )
 
-// Credentials Secret content
-const (
-	CredentialsKeyUsername = "username"
-	CredentialsKeyPassword = "password"
-)
-
 type Config struct {
 	cortexClientConfig cortexClient.Config
 }
 
 // NewClient creates new Cortex Client with provided Cortex Configurations.
 func NewClient(config Config) *cortexClient.CortexClient {
-	client, err := cortexClient.New(config.cortexClientConfig)
+	c, err := cortexClient.New(config.cortexClientConfig)
 
 	if err != nil {
 		fmt.Printf("Could not initialize cortex client: %v", err)
 	}
-	return client
+	return c
 }
 
 // GetConfig constructs a Config that can be used to authenticate to Cortex
@@ -74,6 +68,17 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 		return nil, errors.Wrap(err, errUnmarshalCredentialSecret)
 	}
 
-	cfg := cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address, User: m[CredentialsKeyUsername], Key: m[CredentialsKeyPassword]}
+	// cfg := cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address, User: m[CredentialsKeyUsername], Key: m[CredentialsKeyPassword]}
+	cfg := cortexClient.Config{ID: pc.Spec.TenantID, Address: pc.Spec.Address}
+	if pc.Spec.SecretKeys.ApiUser != "" {
+		cfg.User = m[pc.Spec.SecretKeys.ApiUser]
+	}
+	if pc.Spec.SecretKeys.ApiKey != "" {
+		cfg.Key = m[pc.Spec.SecretKeys.ApiKey]
+	}
+	if pc.Spec.SecretKeys.AuthToken != "" {
+		cfg.AuthToken = m[pc.Spec.SecretKeys.AuthToken]
+	}
+
 	return &Config{cortexClientConfig: cfg}, nil
 }
