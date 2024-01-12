@@ -33,8 +33,18 @@ type ProviderConfigSpec struct {
 	// Address of the cortex server
 	Address string `json:"address"`
 
+	// The keys of other cortex configuration parameters that are retrieved from Credentials secrets
+	SecretKeys CortexSecretKeys `json:"secretKeys"`
+
 	// Credentials required to authenticate to this provider.
-	// Credentials ProviderCredentials `json:"credentials"`
+	Credentials ProviderCredentials `json:"credentials"`
+}
+
+type CortexSecretKeys struct {
+	// The keys in ProviderCredentials of the cortex credentials. More info at https://github.com/cortexproject/cortex-tools/blob/main/README.md#configuration
+	ApiUser   string `json:"apiUser,omitempty"`
+	ApiKey    string `json:"apiKey,omitempty"`
+	AuthToken string `json:"authToken,omitempty"`
 }
 
 // ProviderCredentials required to authenticate.

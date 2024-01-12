@@ -1,0 +1,56 @@
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-cortex
+spec:
+  package: your_artifactory/provider-cortex:v0.0.0
+  # runtime configurations for crossplane 1.14+
+  runtimeConfigRef:
+    name: config-cortex
+---
+# config map with root certificate for https cortex endpoint
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cortex-pemstore
+  namespace: crossplane-system
+data:
+  CortexRootCore.pem.cer: |- 
+    "-----BEGIN CERTIFICATE-----\r\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\r\n-----END
+    CERTIFICATE-----\r\n"
+
+---
+# for cortex https endpoint, the root certificate needs to be mounted in the provider pod
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: config-cortex
+spec:
+  deploymentTemplate:
+    spec:
+      selector: {}
+      template:
+        spec:
+          containers:
+            - name: package-runtime
+              args:
+                - --debug
+              resources:
+                limits:
+                  cpu: 350m
+                  memory: 256M
+                requests:
+                  cpu: 100m
+                  memory: 128M
+              volumeMounts:
+                - mountPath: /etc/ssl/certs/CortexRootCore.pem.cer
+                  name: cortex-pemstore
+                  readOnly: false
+                  subPath: CortexRootCore.pem.cer
+          securityContext:
+            fsGroup: 2000
+          volumes:
+            - configMap:
+                name: cortex-pemstore
+              name: cortex-pemstore

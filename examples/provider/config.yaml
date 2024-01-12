@@ -1,7 +1,28 @@
+---
 apiVersion: cortex.crossplane.io/v1alpha1
 kind: ProviderConfig
 metadata:
-  name: provider-cortex
+  name: providerconfig-cortex
 spec:
-  tenantId: example-tenant
-  address: http://cortex.default.svc:9009
+  address: https://metricstore.abc.net
+  tenantId: tenant-example
+  secretKeys:
+    # see https://github.com/cortexproject/cortex-tools/blob/main/README.md#configuration
+    apiUser: username
+    apiKey: password
+    # authToken: token
+  credentials:
+    source: Secret
+    secretRef:
+      name: secret-name
+      namespace: crossplane-system
+      key: credentials
+---
+# example secret with credentials {"username": "your_username", "password": "your_password"} in base64 encode
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-name
+  namespace: crossplane-system
+data:
+  credentials: eyJ1c2VybmFtZSI6ICJ5b3VyX3VzZXJuYW1lIiwgInBhc3N3b3JkIjogInlvdXJfcGFzc3dvcmQifQ==
